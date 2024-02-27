@@ -1,3 +1,4 @@
+import functools
 import textwrap
 from typing import List, Union
 
@@ -7,24 +8,10 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.runnables import Runnable
 from langchain_openai import ChatOpenAI
-from langgraph.graph import MessageGraph
-from langgraph_engineer import ingest
+from langgraph.graph import END, MessageGraph
+from langgraph_engineer import code_utils, ingest
 
 Messages = Union[list[AnyMessage], AnyMessage]
-
-
-# def add_messages(left: Messages, right: Messages) -> Messages:
-#     if not isinstance(left, list):
-#         left = [left]
-#     if not isinstance(right, list):
-#         right = [right]
-#     res = left + right
-#     return res
-
-
-# class GraphState(TypedDict):
-#     image: Optional[str]
-#     messages: Annotated[List[BaseMessage], add_messages]
 
 
 def wrap_state(state: List[BaseMessage]) -> dict:
@@ -69,9 +56,12 @@ class code(BaseModel):
     code: str = Field(description="Code block not including import statements")
 
 
-def format_code(tools: list[code]) -> BaseMessage:
+def format_code(tools: list[code], name: str = "Junior Developer") -> BaseMessage:
     invoked = tools[0]
-    return AIMessage(content=f"\"\"\"\n{invoked.module_docstring}\n\"\"\"\n\n{invoked.imports}\n\n{invoked.code}")
+    return AIMessage(
+        content=f'"""\n{invoked.module_docstring}\n"""\n\n{invoked.imports}\n\n{invoked.code}',
+        name=name,
+    )
 
 
 def create_code_formatter() -> Runnable:
@@ -136,6 +126,85 @@ LangGraph. Reference the LangGraph docs below for the necessary information.
     )
 
 
+def lint_code(state: List[BaseMessage]) -> List[BaseMessage]:
+    synthetic_code = state[-1].content
+    res = code_utils.run_ruff(synthetic_code)
+    if res["error"]:
+        result = [
+            AIMessage(
+                content=f"{res['error']}\n\nOutput:\n{res['out']}", name="Code Reviewer"
+            )
+        ]
+    else:
+        result = []
+    return result
+
+
+def should_regenerate(state: List[BaseMessage], max_tries: int = 3) -> str:
+    num_code_reviewer_messages = sum(
+        1 for message in state if message.name == "Code Reviewer"
+    )
+    if (
+        num_code_reviewer_messages == num_code_reviewer_messages
+        or num_code_reviewer_messages >= max_tries
+    ):
+        # Either no errors or too many attempts
+        return END
+
+    return "fix_code"
+
+
+def create_code_fixer() -> Runnable:
+    template = """You are an expert python developer, knowledgeable in LangGraph.
+Fix the junior developer's draft code to ensure it is free of errors.
+Consult the following docs for the necessary information.
+<docs>
+{docs}
+</docs>
+"""
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            ("system", template),
+            MessagesPlaceholder(variable_name="messages"),
+        ]
+    ).partial(docs=ingest.load_docs())
+
+    llm = ChatOpenAI(temperature=0, model="gpt-4-0125-preview").bind_tools(
+        [code], tool_choice="code"
+    )
+    parser = PydanticToolsParser(tools=[code])
+
+    def format_messages(state: List[BaseMessage]):
+        # Remove any images here
+        messages = []
+        for message in state:
+            if isinstance(message.content, str):
+                messages.append(message)
+                continue
+            if any(message["type"] == "image_url" for message in message.content):
+                new_content = [
+                    content
+                    for content in message.content
+                    if content["type"] != "image_url"
+                ]
+                messages.append(
+                    message.__class__(
+                        **message.dict(exclude={"content"}), content=new_content
+                    )
+                )
+                continue
+            messages.append(message)
+        return {"messages": messages}
+
+    return (
+        format_messages
+        | prompt
+        | llm
+        | parser
+        | functools.partial(format_code, name="Senior Developer")
+    ).with_config(run_name="code_fixer")
+
+
 def pick_route(state: List[BaseMessage]) -> str:
     message_content = state[-1].content
     if isinstance(message_content, list) and any(
@@ -154,10 +223,14 @@ def build_graph() -> Runnable:
     builder.add_node("understand_image", create_image_interpreter())
     builder.add_node("format_code", create_code_formatter())
     builder.add_node("generate_code", create_code_generator())
+    builder.add_node("lint_code", lint_code)
+    builder.add_node("fix_code", create_code_fixer())
 
     builder.add_conditional_edges("enter", pick_route)
     builder.add_edge("understand_image", "format_code")
+    builder.add_edge("generate_code", "lint_code")
+    builder.add_edge("format_code", "lint_code")
+    builder.add_edge("fix_code", "lint_code")
     builder.set_entry_point("enter")
-    builder.set_finish_point("generate_code")
-    builder.set_finish_point("format_code")
+    builder.add_conditional_edges("lint_code", should_regenerate)
     return builder.compile()

@@ -9,6 +9,7 @@ from langgraph.graph import END
 from langgraph_engineer import ingest, system
 from typing_extensions import Annotated
 
+
 logging.basicConfig(level=logging.INFO)
 
 app = typer.Typer(no_args_is_help=True, add_completion=True)

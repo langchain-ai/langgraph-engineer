@@ -1,11 +1,12 @@
+import functools
 import logging
-import warnings
 
 from bs4 import BeautifulSoup
 from langchain_community.document_loaders.recursive_url_loader import \
     RecursiveUrlLoader
 from langchain_core.load import dumps, loads
 from langgraph_engineer.constants import DOCS_PATH
+import warnings
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +62,7 @@ def _format_docs(docs):
     return "\n\n\n --- \n\n\n".join([doc.page_content for doc in docs])
 
 
+@functools.lru_cache
 def load_docs() -> str:
     # Load the documents from 'DOCS_PATH'
     if not DOCS_PATH.exists():

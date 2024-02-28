@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "langgraph-engineer"
+version = "0.1.0"
+description = ""
+authors = ["William Fu-Hinthorn <13333726+hinthornw@users.noreply.github.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+typer = "^0.9.0"
+langgraph = "^0.0.26"
+langchain-community = "^0.0.24"
+langchain-openai = "^0.0.7"
+langchain-core = "^0.1.27"
+bs4 = "^0.0.2"
+ruff = "^0.2.2"
+
+[tool.poetry.scripts]
+langgraph-engineer = "langgraph_engineer.main:app"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.2.2"
+black = "^24.2.0"
+mypy = "^1.8.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

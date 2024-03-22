@@ -1,0 +1,832 @@
+[
+  {
+    "url": "https://api.github.com/repos/langchain-ai/langgraph/contents/examples/chatbot-simulation-evaluation?ref=main",
+    "predicted": "```json\n{\n  \"state\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"messages\": {\n        \"type\": \"array\",\n        \"items\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"role\": {\n              \"type\": \"string\",\n              \"annotations\": {\n                \"description\": \"Role of the message sender\",\n                \"constraints\": \"Must be either 'user' or 'system'\"\n              }\n            },\n            \"content\": {\n              \"type\": \"string\",\n              \"annotations\": {\n                \"description\": \"Content of the message\"\n              }\n            }\n          },\n          \"annotations\": {\n            \"description\": \"List of messages exchanged during the conversation\"\n          }\n        }\n      }\n    },\n    \"annotations\": {\n      \"description\": \"State of the chat conversation between the simulated user and the chat bot\"\n    }\n  },\n  \"nodes\": [\n    {\n      \"id\": \"user\",\n      \"description\": \"This node simulates a user interacting with the chat bot.\"\n    },\n    {\n      \"id\": \"chat_bot\",\n      \"description\": \"This node represents the chat bot being evaluated.\"\n    },\n    {\n      \"id\": \"end\",\n      \"is_end\": true,\n      \"description\": \"This node represents the end of the conversation.\"\n    }\n  ],\n  \"edges\": [\n    {\n      \"sources\": [\"chat_bot\"],\n      \"targets\": [\"user\"],\n      \"condition\": \"All messages from the chat bot are passed to the simulated user.\"\n    },\n    {\n      \"sources\": [\"user\"],\n      \"targets\": [\"chat_bot\"],\n      \"condition\": \"If the conversation should continue, pass the message to the chat bot.\"\n    },\n    {\n      \"sources\": [\"user\"],\n      \"targets\": [\"end\"],\n      \"condition\": \"If the conversation should end (user responds with 'FINISHED' or more than 6 messages), transition to the 'end' node.\"\n    }\n  ]\n}\n```",
+    "i": 0,
+    "schema": {
+      "state": {
+        "type": "object",
+        "properties": {
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "role": {
+                  "type": "string",
+                  "annotations": {
+                    "description": "Role of the message sender",
+                    "constraints": "Must be either 'user' or 'system'"
+                  }
+                },
+                "content": {
+                  "type": "string",
+                  "annotations": {
+                    "description": "Content of the message"
+                  }
+                }
+              },
+              "annotations": {
+                "description": "List of messages exchanged during the conversation"
+              }
+            }
+          }
+        },
+        "annotations": {
+          "description": "State of the chat conversation between the simulated user and the chat bot"
+        }
+      },
+      "nodes": [
+        {
+          "id": "user",
+          "description": "This node simulates a user interacting with the chat bot."
+        },
+        {
+          "id": "chat_bot",
+          "description": "This node represents the chat bot being evaluated."
+        },
+        {
+          "id": "end",
+          "is_end": true,
+          "description": "This node represents the end of the conversation."
+        }
+      ],
+      "edges": [
+        {
+          "sources": [
+            "chat_bot"
+          ],
+          "targets": [
+            "user"
+          ],
+          "condition": "All messages from the chat bot are passed to the simulated user."
+        },
+        {
+          "sources": [
+            "user"
+          ],
+          "targets": [
+            "chat_bot"
+          ],
+          "condition": "If the conversation should continue, pass the message to the chat bot."
+        },
+        {
+          "sources": [
+            "user"
+          ],
+          "targets": [
+            "end"
+          ],
+          "condition": "If the conversation should end (user responds with 'FINISHED' or more than 6 messages), transition to the 'end' node."
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://api.github.com/repos/langchain-ai/langgraph/contents/examples/multi_agent?ref=main",
+    "predicted": "Based on the provided notebook and the accompanying diagram, we can generate the following JSON representation for the LangGraph Schema:\n\n```json\n{\n  \"state\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"messages\": {\n        \"type\": \"array\",\n        \"items\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"content\": {\n              \"type\": \"string\",\n              \"annotations\": {\n                \"description\": \"Content of the message\"\n              }\n            },\n            \"name\": {\n              \"type\": \"string\",\n              \"annotations\": {\n                \"description\": \"Name of the message sender\"\n              }\n            }\n          },\n          \"annotations\": {\n            \"description\": \"A list of messages exchanged between the user and agents\",\n            \"constraints\": \"Messages are appended to this list\"\n          }\n        }\n      },\n      \"next\": {\n        \"type\": \"string\",\n        \"annotations\": {\n          \"description\": \"Indicates the next agent node the supervisor will route to or if the process should finish\"\n        }\n      }\n    },\n    \"annotations\": {\n      \"description\": \"State of the agent supervisor and worker nodes during the conversation\"\n    }\n  },\n  \"nodes\": [\n    {\n      \"id\": \"supervisor\",\n      \"is_start\": true,\n      \"description\": \"The supervisor node that manages conversation routing between worker agents\"\n    },\n    {\n      \"id\": \"Researcher\",\n      \"description\": \"Worker node responsible for web research tasks\"\n    },\n    {\n      \"id\": \"Coder\",\n      \"description\": \"Worker node responsible for executing code and generating plots\"\n    },\n    {\n      \"id\": \"end\",\n      \"is_end\": true,\n      \"description\": \"The end node indicating the completion of the workflow\"\n    }\n  ],\n  \"edges\": [\n    {\n      \"sources\": [\"supervisor\"],\n      \"targets\": [\"Researcher\"],\n      \"condition\": \"If the supervisor selects 'Researcher', transition to the Researcher node\"\n    },\n    {\n      \"sources\": [\"supervisor\"],\n      \"targets\": [\"Coder\"],\n      \"condition\": \"If the supervisor selects 'Coder', transition to the Coder node\"\n    },\n    {\n      \"sources\": [\"Researcher\"],\n      \"targets\": [\"supervisor\"],\n      \"condition\": \"After the Researcher completes its task, return control to the supervisor\"\n    },\n    {\n      \"sources\": [\"Coder\"],\n      \"targets\": [\"supervisor\"],\n      \"condition\": \"After the Coder completes its task, return control to the supervisor\"\n    },\n    {\n      \"sources\": [\"supervisor\"],\n      \"targets\": [\"end\"],\n      \"condition\": \"If the supervisor indicates 'FINISH', transition to the end node\"\n    }\n  ]\n}\n```\n\nThis JSON schema accurately represents the state and transitions for the agent supervisor application described in the notebook, and it aligns with the LangGraph schema format.",
+    "i": 4,
+    "schema": {
+      "state": {
+        "type": "object",
+        "properties": {
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "string",
+                  "annotations": {
+                    "description": "Content of the message"
+                  }
+                },
+                "name": {
+                  "type": "string",
+                  "annotations": {
+                    "description": "Name of the message sender"
+                  }
+                }
+              },
+              "annotations": {
+                "description": "A list of messages exchanged between the user and agents",
+                "constraints": "Messages are appended to this list"
+              }
+            }
+          },
+          "next": {
+            "type": "string",
+            "annotations": {
+              "description": "Indicates the next agent node the supervisor will route to or if the process should finish"
+            }
+          }
+        },
+        "annotations": {
+          "description": "State of the agent supervisor and worker nodes during the conversation"
+        }
+      },
+      "nodes": [
+        {
+          "id": "supervisor",
+          "is_start": true,
+          "description": "The supervisor node that manages conversation routing between worker agents"
+        },
+        {
+          "id": "Researcher",
+          "description": "Worker node responsible for web research tasks"
+        },
+        {
+          "id": "Coder",
+          "description": "Worker node responsible for executing code and generating plots"
+        },
+        {
+          "id": "end",
+          "is_end": true,
+          "description": "The end node indicating the completion of the workflow"
+        }
+      ],
+      "edges": [
+        {
+          "sources": [
+            "supervisor"
+          ],
+          "targets": [
+            "Researcher"
+          ],
+          "condition": "If the supervisor selects 'Researcher', transition to the Researcher node"
+        },
+        {
+          "sources": [
+            "supervisor"
+          ],
+          "targets": [
+            "Coder"
+          ],
+          "condition": "If the supervisor selects 'Coder', transition to the Coder node"
+        },
+        {
+          "sources": [
+            "Researcher"
+          ],
+          "targets": [
+            "supervisor"
+          ],
+          "condition": "After the Researcher completes its task, return control to the supervisor"
+        },
+        {
+          "sources": [
+            "Coder"
+          ],
+          "targets": [
+            "supervisor"
+          ],
+          "condition": "After the Coder completes its task, return control to the supervisor"
+        },
+        {
+          "sources": [
+            "supervisor"
+          ],
+          "targets": [
+            "end"
+          ],
+          "condition": "If the supervisor indicates 'FINISH', transition to the end node"
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://api.github.com/repos/langchain-ai/langgraph/contents/examples/reflection?ref=main",
+    "predicted": "Based on the provided notebook and the accompanying diagram for the application, we can define the following LangGraph Schema JSON:\n\n```json\n{\n  \"state\": {\n    \"type\": \"array\",\n    \"items\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"type\": \"string\",\n          \"annotations\": {\n            \"description\": \"Type of the message, either from the user (human) or from the AI (ai)\"\n          }\n        },\n        \"content\": {\n          \"type\": \"string\",\n          \"annotations\": {\n            \"description\": \"Content of the message\"\n          }\n        }\n      },\n      \"annotations\": {\n        \"description\": \"The messages that are exchanged in the system\"\n      }\n    },\n    \"annotations\": {\n      \"description\": \"The state represents the sequence of messages exchanged between the user and the AI\"\n    }\n  },\n  \"nodes\": [\n    {\n      \"id\": \"generate\",\n      \"is_start\": true,\n      \"description\": \"This node is responsible for generating the initial essay based on the user's request.\"\n    },\n    {\n      \"id\": \"reflect\",\n      \"description\": \"This node is responsible for reflecting on the generated essay and providing critique and recommendations.\"\n    },\n    {\n      \"id\": \"end\",\n      \"is_end\": true,\n      \"description\": \"This node represents the end of the process after a certain number of iterations or when the final essay is deemed good enough.\"\n    }\n  ],\n  \"edges\": [\n    {\n      \"sources\": [\"generate\"],\n      \"targets\": [\"reflect\"],\n      \"condition\": \"After generating the essay, transition to reflection for critique and recommendations.\"\n    },\n    {\n      \"sources\": [\"reflect\"],\n      \"targets\": [\"generate\"],\n      \"condition\": \"After reflecting, go back to generate to improve the essay based on the feedback.\"\n    },\n    {\n      \"sources\": [\"reflect\"],\n      \"targets\": [\"end\"],\n      \"condition\": \"If the reflection indicates that the essay is good enough or after a set number of iterations, transition to the end node.\"\n    }\n  ]\n}\n```\n\nThis JSON schema represents a cycle between the \"generate\" and \"reflect\" nodes, with the potential to end the process based on certain conditions, such as a limit on the number of iterations or a satisfactory quality of the essay. The state is modeled as a sequence of messages that are passed between the user and the AI during the essay generation and reflection process.",
+    "i": 6,
+    "schema": {
+      "state": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "annotations": {
+                "description": "Type of the message, either from the user (human) or from the AI (ai)"
+              }
+            },
+            "content": {
+              "type": "string",
+              "annotations": {
+                "description": "Content of the message"
+              }
+            }
+          },
+          "annotations": {
+            "description": "The messages that are exchanged in the system"
+          }
+        },
+        "annotations": {
+          "description": "The state represents the sequence of messages exchanged between the user and the AI"
+        }
+      },
+      "nodes": [
+        {
+          "id": "generate",
+          "is_start": true,
+          "description": "This node is responsible for generating the initial essay based on the user's request."
+        },
+        {
+          "id": "reflect",
+          "description": "This node is responsible for reflecting on the generated essay and providing critique and recommendations."
+        },
+        {
+          "id": "end",
+          "is_end": true,
+          "description": "This node represents the end of the process after a certain number of iterations or when the final essay is deemed good enough."
+        }
+      ],
+      "edges": [
+        {
+          "sources": [
+            "generate"
+          ],
+          "targets": [
+            "reflect"
+          ],
+          "condition": "After generating the essay, transition to reflection for critique and recommendations."
+        },
+        {
+          "sources": [
+            "reflect"
+          ],
+          "targets": [
+            "generate"
+          ],
+          "condition": "After reflecting, go back to generate to improve the essay based on the feedback."
+        },
+        {
+          "sources": [
+            "reflect"
+          ],
+          "targets": [
+            "end"
+          ],
+          "condition": "If the reflection indicates that the essay is good enough or after a set number of iterations, transition to the end node."
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://api.github.com/repos/langchain-ai/langgraph/contents/examples/llm-compiler?ref=main",
+    "predicted": "Based on the provided notebook, the following is a JSON representation of the LangGraph Schema for the LLMCompiler implementation. The schema defines the state, nodes, and edges that represent the computational graph of the LLMCompiler.\n\n```json\n{\n  \"state\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"messages\": {\n        \"type\": \"array\",\n        \"items\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"content\": {\n              \"type\": \"string\",\n              \"annotations\": {\n                \"description\": \"Content of the message\"\n              }\n            },\n            \"type\": {\n              \"type\": \"string\",\n              \"annotations\": {\n                \"description\": \"Type of the message (e.g., HumanMessage, FunctionMessage, SystemMessage, AIMessage)\"\n              }\n            },\n            \"additional_kwargs\": {\n              \"type\": \"object\",\n              \"annotations\": {\n                \"description\": \"Additional keyword arguments for FunctionMessage if applicable\"\n              }\n            }\n          },\n          \"annotations\": {\n            \"description\": \"List of messages representing the state\"\n          }\n        }\n      },\n      \"observations\": {\n        \"type\": \"object\",\n        \"additionalProperties\": {\n          \"type\": \"string\"\n        },\n        \"annotations\": {\n          \"description\": \"Observations from executed tasks\"\n        }\n      }\n    },\n    \"annotations\": {\n      \"description\": \"State of the LLMCompiler agent\"\n    }\n  },\n  \"nodes\": [\n    {\n      \"id\": \"plan_and_schedule\",\n      \"is_start\": true,\n      \"description\": \"Node that plans and schedules the tasks based on the user's message.\"\n    },\n    {\n      \"id\": \"join\",\n      \"description\": \"Node that decides whether to provide a final response or to replan.\"\n    },\n    {\n      \"id\": \"recontextualize\",\n      \"description\": \"Node that updates the graph state based on the output from the joiner.\"\n    },\n    {\n      \"id\": \"end\",\n      \"is_end\": true,\n      \"description\": \"End node representing the termination of the process.\"\n    }\n  ],\n  \"edges\": [\n    {\n      \"sources\": [\"plan_and_schedule\"],\n      \"targets\": [\"join\"],\n      \"condition\": \"Transition from planning and scheduling to making the join decision.\"\n    },\n    {\n      \"sources\": [\"join\"],\n      \"targets\": [\"plan_and_schedule\"],\n      \"condition\": \"If replanning is needed, loop back to plan_and_schedule.\"\n    },\n    {\n      \"sources\": [\"join\"],\n      \"targets\": [\"end\"],\n      \"condition\": \"If a final response is determined, transition to end.\"\n    }\n  ]\n}\n```\n\nThis JSON schema represents the LLMCompiler as described in the provided notebook, with a state that includes the messages and observations, nodes representing different stages of the computation (planning and scheduling, decision making, and recontextualization), and edges that define the transitions between these nodes based on conditions that determine the flow of the computation graph.",
+    "i": 3,
+    "schema": {
+      "state": {
+        "type": "object",
+        "properties": {
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "string",
+                  "annotations": {
+                    "description": "Content of the message"
+                  }
+                },
+                "type": {
+                  "type": "string",
+                  "annotations": {
+                    "description": "Type of the message (e.g., HumanMessage, FunctionMessage, SystemMessage, AIMessage)"
+                  }
+                },
+                "additional_kwargs": {
+                  "type": "object",
+                  "annotations": {
+                    "description": "Additional keyword arguments for FunctionMessage if applicable"
+                  }
+                }
+              },
+              "annotations": {
+                "description": "List of messages representing the state"
+              }
+            }
+          },
+          "observations": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "annotations": {
+              "description": "Observations from executed tasks"
+            }
+          }
+        },
+        "annotations": {
+          "description": "State of the LLMCompiler agent"
+        }
+      },
+      "nodes": [
+        {
+          "id": "plan_and_schedule",
+          "is_start": true,
+          "description": "Node that plans and schedules the tasks based on the user's message."
+        },
+        {
+          "id": "join",
+          "description": "Node that decides whether to provide a final response or to replan."
+        },
+        {
+          "id": "recontextualize",
+          "description": "Node that updates the graph state based on the output from the joiner."
+        },
+        {
+          "id": "end",
+          "is_end": true,
+          "description": "End node representing the termination of the process."
+        }
+      ],
+      "edges": [
+        {
+          "sources": [
+            "plan_and_schedule"
+          ],
+          "targets": [
+            "join"
+          ],
+          "condition": "Transition from planning and scheduling to making the join decision."
+        },
+        {
+          "sources": [
+            "join"
+          ],
+          "targets": [
+            "plan_and_schedule"
+          ],
+          "condition": "If replanning is needed, loop back to plan_and_schedule."
+        },
+        {
+          "sources": [
+            "join"
+          ],
+          "targets": [
+            "end"
+          ],
+          "condition": "If a final response is determined, transition to end."
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://api.github.com/repos/langchain-ai/langgraph/contents/examples/multi_agent?ref=main",
+    "predicted": "Based on the notebook provided and the accompanying diagram, the following JSON schema represents the LangGraph implementation for the multi-agent collaboration application:\n\n```json\n{\n  \"state\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"messages\": {\n        \"type\": \"array\",\n        \"items\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"content\": {\n              \"type\": \"string\"\n            },\n            \"name\": {\n              \"type\": \"string\"\n            },\n            \"additional_kwargs\": {\n              \"type\": \"object\",\n              \"properties\": {\n                \"function_call\": {\n                  \"type\": \"object\", \n                  \"properties\": {\n                    \"name\": {\"type\": \"string\"},\n                    \"arguments\": {\"type\": \"string\"}\n                  }\n                }\n              }\n            }\n          }\n        },\n        \"annotations\": {\n          \"description\": \"List of messages exchanged between agents and tools\"\n        }\n      },\n      \"sender\": {\n        \"type\": \"string\",\n        \"annotations\": {\n          \"description\": \"The identifier of the last sender\"\n        }\n      }\n    },\n    \"annotations\": {\n      \"description\": \"State of the multi-agent graph including messages and sender information\"\n    }\n  },\n  \"nodes\": [\n    {\n      \"id\": \"Researcher\",\n      \"description\": \"Agent responsible for searching and providing data for chart generation\"\n    },\n    {\n      \"id\": \"Chart Generator\",\n      \"description\": \"Agent responsible for code execution to generate charts\"\n    },\n    {\n      \"id\": \"call_tool\",\n      \"description\": \"Node for invoking tool execution based on agent requests\"\n    },\n    {\n      \"id\": \"router\",\n      \"description\": \"Router node to control flow based on agent output and messages\"\n    },\n    {\n      \"id\": \"end\",\n      \"is_end\": true\n    }\n  ],\n  \"edges\": [\n    {\n      \"sources\": [\"Researcher\"],\n      \"targets\": [\"router\"],\n      \"condition\": \"If the researcher agent sends a message to continue or invokes a tool\"\n    },\n    {\n      \"sources\": [\"Chart Generator\"],\n      \"targets\": [\"router\"],\n      \"condition\": \"If the chart generator agent sends a message to continue or invokes a tool\"\n    },\n    {\n      \"sources\": [\"router\"],\n      \"targets\": [\"call_tool\"],\n      \"condition\": \"If the router node indicates a function call should happen\"\n    },\n    {\n      \"sources\": [\"router\"],\n      \"targets\": [\"Researcher\"],\n      \"condition\": \"If the router node indicates to continue and the sender is 'Chart Generator'\"\n    },\n    {\n      \"sources\": [\"router\"],\n      \"targets\": [\"Chart Generator\"],\n      \"condition\": \"If the router node indicates to continue and the sender is 'Researcher'\"\n    },\n    {\n      \"sources\": [\"router\"],\n      \"targets\": [\"end\"],\n      \"condition\": \"If the router node detects a 'FINAL ANSWER' in the last message\"\n    },\n    {\n      \"sources\": [\"call_tool\"],\n      \"targets\": [\"Researcher\"],\n      \"condition\": \"Post tool invocation, return to 'Researcher' if they were the last sender\"\n    },\n    {\n      \"sources\": [\"call_tool\"],\n      \"targets\": [\"Chart Generator\"],\n      \"condition\": \"Post tool invocation, return to 'Chart Generator' if they were the last sender\"\n    }\n  ]\n}\n```",
+    "i": 5,
+    "schema": {
+      "state": {
+        "type": "object",
+        "properties": {
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "additional_kwargs": {
+                  "type": "object",
+                  "properties": {
+                    "function_call": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "arguments": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "annotations": {
+              "description": "List of messages exchanged between agents and tools"
+            }
+          },
+          "sender": {
+            "type": "string",
+            "annotations": {
+              "description": "The identifier of the last sender"
+            }
+          }
+        },
+        "annotations": {
+          "description": "State of the multi-agent graph including messages and sender information"
+        }
+      },
+      "nodes": [
+        {
+          "id": "Researcher",
+          "description": "Agent responsible for searching and providing data for chart generation"
+        },
+        {
+          "id": "Chart Generator",
+          "description": "Agent responsible for code execution to generate charts"
+        },
+        {
+          "id": "call_tool",
+          "description": "Node for invoking tool execution based on agent requests"
+        },
+        {
+          "id": "router",
+          "description": "Router node to control flow based on agent output and messages"
+        },
+        {
+          "id": "end",
+          "is_end": true
+        }
+      ],
+      "edges": [
+        {
+          "sources": [
+            "Researcher"
+          ],
+          "targets": [
+            "router"
+          ],
+          "condition": "If the researcher agent sends a message to continue or invokes a tool"
+        },
+        {
+          "sources": [
+            "Chart Generator"
+          ],
+          "targets": [
+            "router"
+          ],
+          "condition": "If the chart generator agent sends a message to continue or invokes a tool"
+        },
+        {
+          "sources": [
+            "router"
+          ],
+          "targets": [
+            "call_tool"
+          ],
+          "condition": "If the router node indicates a function call should happen"
+        },
+        {
+          "sources": [
+            "router"
+          ],
+          "targets": [
+            "Researcher"
+          ],
+          "condition": "If the router node indicates to continue and the sender is 'Chart Generator'"
+        },
+        {
+          "sources": [
+            "router"
+          ],
+          "targets": [
+            "Chart Generator"
+          ],
+          "condition": "If the router node indicates to continue and the sender is 'Researcher'"
+        },
+        {
+          "sources": [
+            "router"
+          ],
+          "targets": [
+            "end"
+          ],
+          "condition": "If the router node detects a 'FINAL ANSWER' in the last message"
+        },
+        {
+          "sources": [
+            "call_tool"
+          ],
+          "targets": [
+            "Researcher"
+          ],
+          "condition": "Post tool invocation, return to 'Researcher' if they were the last sender"
+        },
+        {
+          "sources": [
+            "call_tool"
+          ],
+          "targets": [
+            "Chart Generator"
+          ],
+          "condition": "Post tool invocation, return to 'Chart Generator' if they were the last sender"
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://api.github.com/repos/langchain-ai/langgraph/contents/examples/lats?ref=main",
+    "predicted": "```json\n{\n  \"state\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"root\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"messages\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"type\": \"object\",\n              \"properties\": {\n                \"content\": {\n                  \"type\": \"string\"\n                },\n                \"tool_call_id\": {\n                  \"type\": \"string\"\n                }\n              }\n            },\n            \"annotations\": {\n              \"description\": \"List of messages including tool responses\"\n            }\n          },\n          \"children\": {\n            \"type\": \"array\",\n            \"items\": {\n              \"$ref\": \"#/definitions/node\"\n            },\n            \"annotations\": {\n              \"description\": \"List of child nodes in the search tree\"\n            }\n          },\n          \"value\": {\n            \"type\": \"number\",\n            \"annotations\": {\n              \"description\": \"Aggregate value of the node based on reflections\"\n            }\n          },\n          \"visits\": {\n            \"type\": \"integer\",\n            \"annotations\": {\n              \"description\": \"Number of visits to the node during the search\"\n            }\n          },\n          \"reflection\": {\n            \"type\": \"object\",\n            \"properties\": {\n              \"reflections\": {\n                \"type\": \"string\"\n              },\n              \"score\": {\n                \"type\": \"integer\"\n              },\n              \"found_solution\": {\n                \"type\": \"boolean\"\n              }\n            },\n            \"annotations\": {\n              \"description\": \"Reflection details including a score and indication of solution found\"\n            }\n          },\n          \"is_solved\": {\n            \"type\": \"boolean\",\n            \"annotations\": {\n              \"description\": \"Flag indicating if the node represents a solved state\"\n            }\n          },\n          \"depth\": {\n            \"type\": \"integer\",\n            \"annotations\": {\n              \"description\": \"Depth of the node in the search tree\"\n            }\n          }\n        },\n        \"annotations\": {\n          \"description\": \"Root node of the search tree\"\n        }\n      },\n      \"input\": {\n        \"type\": \"string\",\n        \"annotations\": {\n          \"description\": \"User input for initiating the search\"\n        }\n      }\n    },\n    \"annotations\": {\n      \"description\": \"State of the Language Agent Tree Search (LATS)\"\n    }\n  },\n  \"definitions\": {\n    \"node\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"messages\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"object\",\n            \"properties\": {\n              \"content\": {\n                \"type\": \"string\"\n              },\n              \"tool_call_id\": {\n                \"type\": \"string\"\n              }\n            }\n          }\n        },\n        \"children\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"$ref\": \"#/definitions/node\"\n          }\n        },\n        \"value\": {\n          \"type\": \"number\"\n        },\n        \"visits\": {\n          \"type\": \"integer\"\n        },\n        \"reflection\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"reflections\": {\n              \"type\": \"string\"\n            },\n            \"score\": {\n              \"type\": \"integer\"\n            },\n            \"found_solution\": {\n              \"type\": \"boolean\"\n            }\n          }\n        },\n        \"is_solved\": {\n          \"type\": \"boolean\"\n        },\n        \"depth\": {\n          \"type\": \"integer\"\n        },\n        \"parent\": {\n          \"$ref\": \"#/definitions/node\"\n        }\n      }\n    }\n  },\n  \"nodes\": [\n    {\n      \"id\": \"start\",\n      \"is_start\": true,\n      \"description\": \"Generate the initial candidate response.\"\n    },\n    {\n      \"id\": \"expand\",\n      \"description\": \"Expand the search tree with new candidate nodes.\"\n    },\n    {\n      \"id\": \"__end__\",\n      \"is_end\": true,\n      \"description\": \"End state of the graph when a solution is found or maximum depth is reached.\"\n    }\n  ],\n  \"edges\": [\n    {\n      \"sources\": [\"start\"],\n      \"targets\": [\"expand\"],\n      \"condition\": \"Transition to 'expand' to generate new candidate nodes.\"\n    },\n    {\n      \"sources\": [\"expand\"],\n      \"targets\": [\"__end__\"],\n      \"condition\": \"Transition to '__end__' if a solution is found or maximum depth is reached.\"\n    }\n  ]\n}\n```",
+    "i": 2,
+    "schema": {
+      "state": {
+        "type": "object",
+        "properties": {
+          "root": {
+            "type": "object",
+            "properties": {
+              "messages": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "content": {
+                      "type": "string"
+                    },
+                    "tool_call_id": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "annotations": {
+                  "description": "List of messages including tool responses"
+                }
+              },
+              "children": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/node"
+                },
+                "annotations": {
+                  "description": "List of child nodes in the search tree"
+                }
+              },
+              "value": {
+                "type": "number",
+                "annotations": {
+                  "description": "Aggregate value of the node based on reflections"
+                }
+              },
+              "visits": {
+                "type": "integer",
+                "annotations": {
+                  "description": "Number of visits to the node during the search"
+                }
+              },
+              "reflection": {
+                "type": "object",
+                "properties": {
+                  "reflections": {
+                    "type": "string"
+                  },
+                  "score": {
+                    "type": "integer"
+                  },
+                  "found_solution": {
+                    "type": "boolean"
+                  }
+                },
+                "annotations": {
+                  "description": "Reflection details including a score and indication of solution found"
+                }
+              },
+              "is_solved": {
+                "type": "boolean",
+                "annotations": {
+                  "description": "Flag indicating if the node represents a solved state"
+                }
+              },
+              "depth": {
+                "type": "integer",
+                "annotations": {
+                  "description": "Depth of the node in the search tree"
+                }
+              }
+            },
+            "annotations": {
+              "description": "Root node of the search tree"
+            }
+          },
+          "input": {
+            "type": "string",
+            "annotations": {
+              "description": "User input for initiating the search"
+            }
+          }
+        },
+        "annotations": {
+          "description": "State of the Language Agent Tree Search (LATS)"
+        }
+      },
+      "definitions": {
+        "node": {
+          "type": "object",
+          "properties": {
+            "messages": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "content": {
+                    "type": "string"
+                  },
+                  "tool_call_id": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "children": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/node"
+              }
+            },
+            "value": {
+              "type": "number"
+            },
+            "visits": {
+              "type": "integer"
+            },
+            "reflection": {
+              "type": "object",
+              "properties": {
+                "reflections": {
+                  "type": "string"
+                },
+                "score": {
+                  "type": "integer"
+                },
+                "found_solution": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "is_solved": {
+              "type": "boolean"
+            },
+            "depth": {
+              "type": "integer"
+            },
+            "parent": {
+              "$ref": "#/definitions/node"
+            }
+          }
+        }
+      },
+      "nodes": [
+        {
+          "id": "start",
+          "is_start": true,
+          "description": "Generate the initial candidate response."
+        },
+        {
+          "id": "expand",
+          "description": "Expand the search tree with new candidate nodes."
+        },
+        {
+          "id": "__end__",
+          "is_end": true,
+          "description": "End state of the graph when a solution is found or maximum depth is reached."
+        }
+      ],
+      "edges": [
+        {
+          "sources": [
+            "start"
+          ],
+          "targets": [
+            "expand"
+          ],
+          "condition": "Transition to 'expand' to generate new candidate nodes."
+        },
+        {
+          "sources": [
+            "expand"
+          ],
+          "targets": [
+            "__end__"
+          ],
+          "condition": "Transition to '__end__' if a solution is found or maximum depth is reached."
+        }
+      ]
+    }
+  },
+  {
+    "url": "https://api.github.com/repos/langchain-ai/langgraph/contents/examples/chatbots?ref=main",
+    "predicted": "```json\n{\n  \"state\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"messages\": {\n        \"type\": \"array\",\n        \"items\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"content\": {\n              \"type\": \"string\",\n              \"annotations\": {\n                \"description\": \"Content of the message\"\n              }\n            },\n            \"type\": {\n              \"type\": \"string\",\n              \"annotations\": {\n                \"description\": \"Type of the message (e.g., HumanMessage, SystemMessage)\"\n              }\n            },\n            \"additional_kwargs\": {\n              \"type\": \"object\",\n              \"annotations\": {\n                \"description\": \"Additional keyword arguments for messages that invoke tools\",\n                \"constraints\": \"Present if the message is a tool call\"\n              }\n            }\n          },\n          \"annotations\": {\n            \"description\": \"Individual messages within the conversation\"\n          }\n        },\n        \"annotations\": {\n          \"description\": \"A list of messages that represent the conversation history\"\n        }\n      },\n      \"config\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"thread_id\": {\n            \"type\": \"string\",\n            \"format\": \"uuid\",\n            \"annotations\": {\n              \"description\": \"Unique identifier for the conversation thread\"\n            }\n          }\n        },\n        \"annotations\": {\n          \"description\": \"Configuration for the chatbot session\"\n        }\n      }\n    },\n    \"annotations\": {\n      \"description\": \"The state of the chatbot application including messages and session configuration\"\n    }\n  },\n  \"nodes\": [\n    {\n      \"id\": \"gather_requirements\",\n      \"is_start\": true,\n      \"description\": \"Node to gather user requirements for the prompt generator.\"\n    },\n    {\n      \"id\": \"generate_prompt\",\n      \"description\": \"Node to generate the prompt based on the gathered requirements.\"\n    },\n    {\n      \"id\": \"end\",\n      \"is_end\": true,\n      \"description\": \"The end state of the conversation flow.\"\n    }\n  ],\n  \"edges\": [\n    {\n      \"sources\": [\"gather_requirements\"],\n      \"targets\": [\"generate_prompt\"],\n      \"condition\": \"Transition to 'generate_prompt' if the last message was a tool call.\"\n    },\n    {\n      \"sources\": [\"generate_prompt\"],\n      \"targets\": [\"end\"],\n      \"condition\": \"Transition to 'end' if the last message is not a HumanMessage.\"\n    },\n    {\n      \"sources\": [\"generate_prompt\"],\n      \"targets\": [\"gather_requirements\"],\n      \"condition\": \"Transition back to 'gather_requirements' if the last message is a HumanMessage and no tool call has occurred.\"\n    },\n    {\n      \"sources\": [\"gather_requirements\"],\n      \"targets\": [\"end\"],\n      \"condition\": \"Transition to 'end' if the last message is not a HumanMessage.\"\n    }\n  ]\n}\n```",
+    "i": 1,
+    "schema": {
+      "state": {
+        "type": "object",
+        "properties": {
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "string",
+                  "annotations": {
+                    "description": "Content of the message"
+                  }
+                },
+                "type": {
+                  "type": "string",
+                  "annotations": {
+                    "description": "Type of the message (e.g., HumanMessage, SystemMessage)"
+                  }
+                },
+                "additional_kwargs": {
+                  "type": "object",
+                  "annotations": {
+                    "description": "Additional keyword arguments for messages that invoke tools",
+                    "constraints": "Present if the message is a tool call"
+                  }
+                }
+              },
+              "annotations": {
+                "description": "Individual messages within the conversation"
+              }
+            },
+            "annotations": {
+              "description": "A list of messages that represent the conversation history"
+            }
+          },
+          "config": {
+            "type": "object",
+            "properties": {
+              "thread_id": {
+                "type": "string",
+                "format": "uuid",
+                "annotations": {
+                  "description": "Unique identifier for the conversation thread"
+                }
+              }
+            },
+            "annotations": {
+              "description": "Configuration for the chatbot session"
+            }
+          }
+        },
+        "annotations": {
+          "description": "The state of the chatbot application including messages and session configuration"
+        }
+      },
+      "nodes": [
+        {
+          "id": "gather_requirements",
+          "is_start": true,
+          "description": "Node to gather user requirements for the prompt generator."
+        },
+        {
+          "id": "generate_prompt",
+          "description": "Node to generate the prompt based on the gathered requirements."
+        },
+        {
+          "id": "end",
+          "is_end": true,
+          "description": "The end state of the conversation flow."
+        }
+      ],
+      "edges": [
+        {
+          "sources": [
+            "gather_requirements"
+          ],
+          "targets": [
+            "generate_prompt"
+          ],
+          "condition": "Transition to 'generate_prompt' if the last message was a tool call."
+        },
+        {
+          "sources": [
+            "generate_prompt"
+          ],
+          "targets": [
+            "end"
+          ],
+          "condition": "Transition to 'end' if the last message is not a HumanMessage."
+        },
+        {
+          "sources": [
+            "generate_prompt"
+          ],
+          "targets": [
+            "gather_requirements"
+          ],
+          "condition": "Transition back to 'gather_requirements' if the last message is a HumanMessage and no tool call has occurred."
+        },
+        {
+          "sources": [
+            "gather_requirements"
+          ],
+          "targets": [
+            "end"
+          ],
+          "condition": "Transition to 'end' if the last message is not a HumanMessage."
+        }
+      ]
+    }
+  }
+]
